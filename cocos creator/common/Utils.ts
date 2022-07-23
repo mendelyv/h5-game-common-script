@@ -208,7 +208,31 @@
     }
 
 
-
+    /**
+     * 添加按钮点击事件
+     * @param target - 目标节点或按钮组件
+     * @param scriptNode - 响应函数script组件所属节点
+     * @param scriptName - 响应函数script组件名称
+     * @param functionName - 响应函数名称
+     * @param data - 自定义参数
+     * @returns true or false
+     */
+    public static addButtonClickHandler(target: cc.Node | cc.Button, scriptNode: cc.Node, scriptName: string, functionName: string, data?: any) {
+        let button: cc.Button;
+        if (target instanceof cc.Button) button = target;
+        else if (target instanceof cc.Node) button = target.getComponent(cc.Button);
+        if (!button) {
+            console.warn("addButtonClickHandler: target node has no button component");
+            return false;
+        }
+        let h = new cc.Component.EventHandler();
+        h.target = scriptNode;
+        h.component = scriptName;
+        h.handler = functionName;
+        h.customEventData = data;
+        button.clickEvents.push(h);
+        return true;
+    }
 
 
 }

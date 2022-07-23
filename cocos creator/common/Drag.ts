@@ -24,7 +24,7 @@ export default class Drag extends cc.Component {
     }
 
 
-    private onTouchStart(e: cc.Event.EventTouch) {
+    protected onTouchStart(e: cc.Event.EventTouch) {
         let pos = this._parentNode.convertToNodeSpaceAR(e.touch.getLocation());
         this._touchOffset.x = pos.x - this.node.x;
         this._touchOffset.y = pos.y - this.node.y;
@@ -34,7 +34,7 @@ export default class Drag extends cc.Component {
     }
 
 
-    private onTouchMove(e: cc.Event.EventTouch) {
+    protected onTouchMove(e: cc.Event.EventTouch) {
         let pos = this._parentNode.convertToNodeSpaceAR(e.touch.getLocation());
         pos.x -= this._touchOffset.x;
         pos.y -= this._touchOffset.y;
@@ -42,7 +42,7 @@ export default class Drag extends cc.Component {
     }
 
 
-    private onTouchEnd(e: cc.Event.EventTouch) {
+    protected onTouchEnd(e: cc.Event.EventTouch) {
         let pos = this._parentNode.convertToNodeSpaceAR(e.touch.getLocation());
         pos.x -= this._touchOffset.x;
         pos.y -= this._touchOffset.y;

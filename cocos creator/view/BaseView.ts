@@ -1,6 +1,8 @@
 import { ContainerType } from "../../common/ContainerManager";
+import { eventManager, EventType } from "../../common/EventManager";
+import Utils from "../../common/Utils";
 
-const {ccclass} = cc._decorator;
+const { ccclass } = cc._decorator;
 
 /**
  * @class name : BaseView
@@ -13,10 +15,29 @@ export default class BaseView extends cc.Component {
     public static LAYER: ContainerType;
     public static prefabPath: string;
     public prefabName: string;
-    public onOpen(params?: any) {}
-    public onResume(params?: any) {}
-    public onHide(param?: any) {}
-    public onClose(params?: any) {}
-    public onDestory() {}
+    public onOpen(params?: any) { }
+    public onResume(params?: any) { }
+    public onHide(param?: any) { }
+    public onClose(params?: any) { }
+    public onDestory() { }
+    public addButtonHandler(target: cc.Node | cc.Button, functionName: string, data?: any, scriptNode?: cc.Node, scriptName?: string) {
+        if (!scriptNode) scriptNode = this.node;
+        if (!scriptNode) {
+            console.error(`${cc.js.getClassName(this)}.addButtonClickHandler: scriptNode is null`);
+            return false;
+        }
+        if (!scriptName || scriptName == "") scriptName = cc.js.getClassName(this);
+        if (!scriptName || scriptName == "") {
+            console.error(`${cc.js.getClassName(this)}.addButtonClickHandler: scriptName is null`);
+            return false;
+        }
+        return Utils.addButtonClickHandler(target, scriptNode, scriptName, functionName, data);
+    }
+    public addEvent(type: EventType, cb: Function) {
+        eventManager.addEvent(type, cb, this);
+    }
+    public removeEvent(type: EventType, cb: Function) {
+        eventManager.removeEvent(type, cb, this);
+    }
     public static getContainer(): cc.Node { return null; }
 }

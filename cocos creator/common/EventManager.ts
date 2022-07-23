@@ -76,18 +76,7 @@ class EventManager {
 }
 
 export const enum EventType {
-	Fail,
-	Reset,
-	CrossSuccess,
-	AnswerSuccess,
-	Select,
-	Main,
-	Wait,
-	Change,
-	BonuRefresh,
-	E_EffectComplete,
-	DemoCrossSuccess,
-	DemoAnswerSuccess,
+
 }
 
 
