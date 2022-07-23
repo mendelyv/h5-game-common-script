@@ -5,7 +5,7 @@
  * @author : Ran
  * @time : 2022.07.20
  */
- class AssetManager {
+class AssetManager {
     private static _instance: AssetManager;
 
     public static get getInstance(): AssetManager {
@@ -125,11 +125,10 @@
 
     /**
      * 创建预制体
-     * @param prefabName ：预制体名字
-     * @param path ：prefab路径，缺省prefabs
+     * @param prefabPath ：预制体路径，规则为: bundleName://assetName，缺省bundleName为resources
      */
-    public async createPrefab(prefabName: string, path: string = "prefabs"): Promise<cc.Node> {
-        let p = await this.load<cc.Prefab>(`${path}/${prefabName}`);
+    public async createPrefab(prefabPath: string): Promise<cc.Node> {
+        let p = await this.load<cc.Prefab>(prefabPath);
         return cc.instantiate(p) as any;
     }
 

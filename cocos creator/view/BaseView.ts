@@ -11,7 +11,7 @@ const {ccclass} = cc._decorator;
 @ccclass
 export default class BaseView extends cc.Component {
     public static LAYER: ContainerType;
-    public static prefabName: string;
+    public static prefabPath: string;
     public prefabName: string;
     public onOpen(params?: any) {}
     public onResume(params?: any) {}

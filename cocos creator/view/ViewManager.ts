@@ -24,8 +24,7 @@ class ViewManager {
      * @param params - 开启参数
      * @returns 界面节点
      */
-    public async open(cls: Function | string, params?: any) {
-        // prefabName = className.match(/.+?(?=[vV]iew)/)[0];
+    public async open(cls, params?: any) {
         /** 界面控制类名 */
         let className = this.getViewClassName(cls);
         if (!className || className === "") return;
@@ -34,15 +33,18 @@ class ViewManager {
         if (index > -1) return this.resume(cls, params);
 
         /** 界面预制体名称 */
-        let prefabName = cls["prefabName"];
-        if (!prefabName) prefabName = className;
+        let prefabPath = cls["prefabPath"];
+        if (!prefabPath) {
+            console.error(`${className} has not prefabPath`);
+            return
+        }
 
         // 获取之前的节点存储，注意这里的kye值为类名
         let node = this.viewNodes[className];
         if (!node) {
-            node = await assetManager.createPrefab(prefabName) as cc.Node;
+            node = await assetManager.createPrefab(prefabPath) as cc.Node;
             if (!node) {
-                console.error(`open ${className} failed ${prefabName} is not exist`);
+                console.error(`open ${className} failed ${prefabPath} is not exist`);
                 return;
             }
             node.name = className;
@@ -52,12 +54,12 @@ class ViewManager {
 
         //获取到前一个页面
         let preViewName = this.viewOpenedArray[this.viewOpenedArray.length - 1];
-        if(preViewName) {
+        if (preViewName) {
             let preView = this.getViewNode(preViewName);
-            if(preView) {
+            if (preView) {
                 let preScript = this.getViewScript(preViewName);
-                if(preScript) {
-                    if(preScript["onHide"])
+                if (preScript) {
+                    if (preScript["onHide"])
                         preScript["onHide"]();
                 }
             } else {
@@ -67,7 +69,7 @@ class ViewManager {
 
         // 添加到父节点
         let viewContainer = this.getViewContainer(cls);
-        if(!viewContainer) return;
+        if (!viewContainer) return;
         viewContainer.addChild(node);
         this.viewOpenedArray.push(className);
 
@@ -89,8 +91,10 @@ class ViewManager {
      * @param cls - 界面类
      * @returns 界面节点
      */
-    public resume(cls: Function | string, params?: any) {
+    public resume(cls, params?: any) {
         let className = this.getViewClassName(cls);
+        if (!className || className === "") return;
+
         let index = this.getViewShowIndex(className);
         if (index <= -1) {
             console.warn(`${className} is not show`);
@@ -134,15 +138,25 @@ class ViewManager {
      * @param params - 关闭参数
      * @returns 界面节点
      */
-    public close(cls: Function | string, params?: any) {
-        let className = cc.js.getClassName(cls);
+    public close(cls, params?: any) {
+        let className = this.getViewClassName(cls);
+        if (!className || className === "") return;
+
+        let index = this.getViewShowIndex(cls);
+        if (index < 0) {
+            console.warn(`${className} is not show`);
+            return null;
+        }
         let node = this.viewNodes[className];
-        if (!node) return;
+        if (!node) {
+            console.warn(`${className} has not node, but viewOpenedArray has save, check it`);
+            return null;
+        }
         this.removeFromParent(node);
-        this.viewOpenedArray.splice(this.viewOpenedArray.indexOf(className), 1);
+        this.viewOpenedArray.splice(index, 1);
         let script = this.getViewScript(cls);
-        if(script) {
-            if(script["onClose"])
+        if (script) {
+            if (script["onClose"])
                 script["onClose"](params);
         } else {
             // console.warn(`${className} has not view controller`);
@@ -155,9 +169,14 @@ class ViewManager {
      * 销毁界面
      * @param cls - 界面类
      */
-    public destory(cls: Function | string) {
+    public destory(cls) {
         this.close(cls);
         let className = this.getViewClassName(cls);
+        let script = this.getViewScript(cls);
+        if (script) {
+            if (script["onDestroy"])
+                script["onDestroy"]();
+        }
         delete this.viewNodes[className];
     }
 
@@ -168,13 +187,13 @@ class ViewManager {
     }
 
 
-    private getViewNode(cls: Function | string) {
+    private getViewNode(cls) {
         let className = this.getViewClassName(cls);
         return this.viewNodes[className] || null;
     }
 
 
-    private getViewScript(cls: Function | string) {
+    private getViewScript(cls) {
         let className = this.getViewClassName(cls);
         let node = this.viewNodes[className];
         if (!node) {
@@ -191,23 +210,24 @@ class ViewManager {
      * @param cls - 界面类
      * @returns 界面类名称字符串
      */
-    private getViewClassName(cls: Function | string) {
+    private getViewClassName(cls) {
         let className = "";
         if (typeof cls === "string") className = cls;
         else if (typeof cls === "function") className = cc.js.getClassName(cls);
+        else if (typeof cls === "object") className = cc.js.getClassName(cls.constructor);
         else
             console.error("ViewManager.getViewClassName: cls is not string or function");
         return className;
     }
 
 
-    private getViewShowIndex(cls: Function | string) {
+    private getViewShowIndex(cls) {
         let className = this.getViewClassName(cls);
         return this.viewOpenedArray.indexOf(className);
     }
 
 
-    private getViewContainer(cls: Function | string) {
+    private getViewContainer(cls) {
         let className = this.getViewClassName(cls);
         if (cls === "string") cls = cc.js.getClassByName(cls);
         let containerType = cls["LAYER"];
