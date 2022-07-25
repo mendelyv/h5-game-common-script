@@ -42,7 +42,7 @@ class AssetManager {
      * @param path - 资源路径，规则为: bundleName://assetName，缺省bundleName为resources
      * @returns 资源对象
      */
-    public async load<T extends cc.Asset>(path: string) {
+    public async load<T extends cc.Asset>(path: string): Promise<T> {
         let { bundleName, assetName } = this.parseAssetPath(path);
         let bundle = await this.getBundle(bundleName);
         if (!bundle) return Promise.reject("ERROR Bundle");
