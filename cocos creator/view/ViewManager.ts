@@ -92,7 +92,7 @@ class ViewManager {
      * @param cls - 界面类
      * @returns 界面节点
      */
-    public resume(cls) {
+    public resume(cls, params?: any) {
         let className = this.getViewClassName(cls);
         if (!className || className === "") return;
 
@@ -134,7 +134,7 @@ class ViewManager {
         let script = this.getViewScript(cls);
         if (script) {
             if (script["onResume"])
-                script["onResume"]();
+                script["onResume"](params);
         } else {
             // console.warn(`${className} has not view controller`);
         }
@@ -176,21 +176,6 @@ class ViewManager {
                 script["onClose"](params);
         } else {
             // console.warn(`${className} has not view controller`);
-        }
-
-        //获取到前一个页面
-        let preViewName = this.viewOpenedArray[this.viewOpenedArray.length - 1];
-        if (preViewName) {
-            let preView = this.getViewNode(preViewName);
-            if (preView) {
-                let preScript = this.getViewScript(preViewName);
-                if (preScript) {
-                    if (preScript["onResume"])
-                        preScript["onResume"]();
-                }
-            } else {
-                console.warn(`${preViewName} is not show, but viewOpenedArray has save, check it`);
-            }
         }
 
         return node;

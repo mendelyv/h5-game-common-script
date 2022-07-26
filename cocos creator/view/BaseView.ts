@@ -16,8 +16,8 @@ export default class BaseView extends cc.Component {
     public static prefabPath: string;
     public prefabName: string;
     public onOpen(params?: any) { }
-    public onResume() { }
-    public onHide(param?: any) { }
+    public onResume(params?: any) { }
+    public onHide() { }
     public onClose(params?: any) { }
     public onDestory() { }
     public addButtonHandler(target: cc.Node | cc.Button, functionName: string, data?: any, scriptNode?: cc.Node, scriptName?: string) {
