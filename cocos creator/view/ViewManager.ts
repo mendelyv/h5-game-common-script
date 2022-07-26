@@ -51,6 +51,7 @@ class ViewManager {
             node.name = className;
             this.viewNodes[className] = node;
             this.analyzeViewScript(node, className);
+            this.addBlockInputEvent(node);
         }
 
         //获取到前一个页面
@@ -145,6 +146,12 @@ class ViewManager {
     private analyzeViewScript(node: cc.Node, scriptName: string) {
         let has = node.getComponent(scriptName) != null;
         if (!has) node.addComponent(scriptName);
+    }
+
+
+    private addBlockInputEvent(node: cc.Node) {
+        if(!node) return;
+        if(!node.getComponent(cc.BlockInputEvents)) node.addComponent(cc.BlockInputEvents);
     }
 
 
