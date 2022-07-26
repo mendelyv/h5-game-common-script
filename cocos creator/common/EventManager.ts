@@ -75,9 +75,6 @@ class EventManager {
 	}
 }
 
-export const enum EventType {
-
-}
 
 
 export const eventManager = EventManager.getInstance;

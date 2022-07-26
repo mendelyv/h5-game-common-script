@@ -1,5 +1,5 @@
 import { ContainerType } from "../../common/ContainerManager";
-import { eventManager, EventType } from "../../common/EventManager";
+import { eventManager } from "../../common/EventManager";
 import Utils from "../../common/Utils";
 
 const { ccclass } = cc._decorator;
@@ -33,10 +33,10 @@ export default class BaseView extends cc.Component {
         }
         return Utils.addButtonClickHandler(target, scriptNode, scriptName, functionName, data);
     }
-    public addEvent(type: EventType, cb: Function) {
+    public addEvent(type, cb: Function) {
         eventManager.addEvent(type, cb, this);
     }
-    public removeEvent(type: EventType, cb: Function) {
+    public removeEvent(type, cb: Function) {
         eventManager.removeEvent(type, cb, this);
     }
     public static getContainer(): cc.Node { return null; }

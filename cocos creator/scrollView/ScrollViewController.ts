@@ -37,6 +37,10 @@ export default class ScrollViewController extends cc.Component {
     private inited: boolean;
     private _data: any;
     public set data(data: any) {
+        // let range = this.getVisibleRange();
+        // this.recycleRendersByRange(range);
+        this.recycleAllRender();
+
         this._data = data;
         this.visibleRange[0] = this.visibleRange[1] = -1;
     }
@@ -69,6 +73,7 @@ export default class ScrollViewController extends cc.Component {
         if (this.inited) return;
         this.inited = true;
 
+        this._data = [];
         this.itemPool = new cc.NodePool();
         if (!this.scrollView) this.scrollView = this.node.getComponent(cc.ScrollView);
         if (!this.scrollView) {
@@ -175,12 +180,13 @@ export default class ScrollViewController extends cc.Component {
         row = horizontal ? index % this.multiple : Math.floor(index / this.multiple);
         col = horizontal ? Math.floor(index / this.multiple) : index % this.multiple;
         let gap = horizontal ? this.gap.x : this.gap.y;
+        // 方向辅助参数
         let duration = new cc.Vec2(0, 0);
         duration.x = horizontal ? 1 : 0;
         duration.y = horizontal ? 0 : 1;
         if (!horizontal && this.multiple > 1) duration.x = 1;
         if (horizontal && this.multiple > 1) duration.y = 1;
-        let x = (render.width * (render.anchorX + col)) * duration.x + this.paddingLeft + gap * col - this.content.width * this.content.anchorX;
+        let x = (render.width * (render.anchorX + col)) * duration.x + this.paddingLeft + gap * col - this.content.width * this.content.anchorX + render.anchorX * render.width - this.content.width * this.content.anchorX;
         let y = (render.height * (1 - render.anchorY + row)) * duration.y + this.paddingTop + gap * row - this.content.height * (1 - this.content.anchorY);
         y *= -1;
         render.setPosition(x, y);
@@ -199,11 +205,12 @@ export default class ScrollViewController extends cc.Component {
 
     /* 回收scrollView的content中的所有节点 */
     private recycleAllRender() {
-        for (let i = 0; i < this.content.children.length; i++) {
+        for (let i = this.content.children.length - 1; i >= 0; i--) {
             let c = this.content.children[i];
-            this.content.removeChild(c);
+            c.removeFromParent(false)
             this.itemPool.put(c);
         }
+        this.renderIndexDictionary = {};
     }
 
 
