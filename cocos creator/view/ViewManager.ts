@@ -30,9 +30,10 @@ class ViewManager {
         if (!className || className === "") return;
 
         let index = this.getViewShowIndex(className);
-        if (index > -1) return this.resume(cls, params);
+        if (index > -1) return this.resume(cls);
 
         /** 界面预制体名称 */
+        if(typeof cls === "string") cls = cc.js.getClassByName(cls);
         let prefabPath = cls["prefabPath"];
         if (!prefabPath) {
             console.error(`${className} has not prefabPath`);
@@ -91,7 +92,7 @@ class ViewManager {
      * @param cls - 界面类
      * @returns 界面节点
      */
-    public resume(cls, params?: any) {
+    public resume(cls) {
         let className = this.getViewClassName(cls);
         if (!className || className === "") return;
 
@@ -112,13 +113,28 @@ class ViewManager {
         }
         node.setSiblingIndex(container.children.length - 1);
 
+        //获取到前一个页面
+        let preViewName = this.viewOpenedArray[this.viewOpenedArray.length - 1];
+        if (preViewName) {
+            let preView = this.getViewNode(preViewName);
+            if (preView) {
+                let preScript = this.getViewScript(preViewName);
+                if (preScript) {
+                    if (preScript["onHide"])
+                        preScript["onHide"]();
+                }
+            } else {
+                console.warn(`${preViewName} is not show, but viewOpenedArray has save, check it`);
+            }
+        }
+
         let temp = this.viewOpenedArray.splice(index, 1)[0];
         this.viewOpenedArray.push(temp);
 
         let script = this.getViewScript(cls);
         if (script) {
             if (script["onResume"])
-                script["onResume"](params);
+                script["onResume"]();
         } else {
             // console.warn(`${className} has not view controller`);
         }
@@ -161,6 +177,22 @@ class ViewManager {
         } else {
             // console.warn(`${className} has not view controller`);
         }
+
+        //获取到前一个页面
+        let preViewName = this.viewOpenedArray[this.viewOpenedArray.length - 1];
+        if (preViewName) {
+            let preView = this.getViewNode(preViewName);
+            if (preView) {
+                let preScript = this.getViewScript(preViewName);
+                if (preScript) {
+                    if (preScript["onResume"])
+                        preScript["onResume"]();
+                }
+            } else {
+                console.warn(`${preViewName} is not show, but viewOpenedArray has save, check it`);
+            }
+        }
+
         return node;
     }
 
