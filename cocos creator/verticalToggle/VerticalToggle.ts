@@ -1,4 +1,3 @@
-
 import { eventManager } from "../../../common/EventManager";
 import Utils from "../../../common/Utils";
 import { Event } from "../../../Event";
@@ -35,6 +34,10 @@ export default class VerticalToggle extends cc.Component {
         this.scComponent = this.scrollView.getComponent(cc.ScrollView);
         this.scComponent.elastic = false;
         this.content = this.scComponent.content;
+        let widget = this.scrollView.addComponent(cc.Widget);
+        widget.target = this.mainGroup;
+        widget.horizontalCenter = 0;
+        widget.top = -this.mainGroup.height;
 
         this.mainGroup.on(cc.Node.EventType.TOUCH_END, this.onClick, this);
 
@@ -50,7 +53,11 @@ export default class VerticalToggle extends cc.Component {
 
     protected dataChanged() {
         this.scController.data = this._data;
-        // this.scrollView.height = this.content.height > this.maxHeight ? this.maxHeight : this.content.height;
+        let height = this.scController.paddingTop + this.scController.renderHeight * this._data.length + this.scController.gap.y * (this._data.length - 1) + this.scController.paddingBottom;
+        this.scrollView.height = height > this.maxHeight ? this.maxHeight : height;
+        // let y = this.scrollView.height * this.scrollView.anchorY + this.mainGroup.height * this.mainGroup.anchorY;
+        // this.scrollView.y = this.mainGroup.y - y;
+        this.scComponent["_view"].height = this.scrollView.height;
     }
 
 
