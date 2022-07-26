@@ -235,4 +235,27 @@
     }
 
 
+    /**
+     * 节点添加事件，这个方法默认会给节点添加屏蔽点击穿透组件
+     * @param target - 事件节点
+     * @param eventType - 事件类型
+     * @param callback - 回调函数
+     * @param callbackObj - 回调函数所属对象
+     * @param once - 是否只监听一次
+     * @param touchThough - 是否穿透
+     */
+    public static addNodeEvent(target: cc.Node, eventType, callback: Function, callbackObj: any, once: boolean = false, touchThough: boolean = false) {
+        if(once) {
+            target.once(eventType, callback, callbackObj);
+        } else {
+            target.on(eventType, callback, callbackObj);
+        }
+        if(!touchThough) {
+            if(!target.getComponent(cc.BlockInputEvents)) {
+                target.addComponent(cc.BlockInputEvents);
+            }
+        }
+    }
+
+
 }
