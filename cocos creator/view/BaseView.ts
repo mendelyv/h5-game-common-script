@@ -15,6 +15,10 @@ export default class BaseView extends cc.Component {
     public static LAYER: ContainerType;
     public static prefabPath: string;
     public prefabName: string;
+    public adapterNodes: cc.Node[] = [];
+    start() {
+        this.screenAdapter();
+    }
     public onOpen(params?: any) { }
     public onResume(params?: any) { }
     public onHide() { }
@@ -40,4 +44,25 @@ export default class BaseView extends cc.Component {
         eventManager.removeEvent(type, cb, this);
     }
     public static getContainer(): cc.Node { return null; }
+    public screenAdapter() {
+        if(this.adapterNodes.length < 0) return;
+        if(!this.needAdapter()) return;
+
+        let designHeight = cc.view.getDesignResolutionSize().height;
+        let screenHeight = cc.winSize.height;
+
+        for(let i = 0; i < this.adapterNodes.length; i++) {
+            let node = this.adapterNodes[i];
+            let scale = node.scale;
+            node.scale = scale * screenHeight / designHeight;
+        }
+        this.adapterNodes = [];
+    }
+    protected needAdapter() {
+        let designHeight = cc.view.getDesignResolutionSize().height;
+        // let screenHeight = cc.winSize.height;
+        let screenHeight = document.body.offsetHeight;
+        if(screenHeight < designHeight) return true;
+        return false;
+    }
 }

@@ -106,11 +106,11 @@ class AssetManager {
     public releaseBundle(bundle: string | cc.AssetManager.Bundle) {
         if (typeof bundle === "string") {
             let b = cc.assetManager.getBundle(bundle);
-            if(!b) return;
+            if (!b) return;
             b.releaseAll();
             cc.assetManager.removeBundle(b);
         } else {
-            if(!bundle) return;
+            if (!bundle) return;
             bundle.releaseAll();
             cc.assetManager.removeBundle(bundle);
         }
@@ -132,6 +132,35 @@ class AssetManager {
         return cc.instantiate(p) as any;
     }
 
+
+    /**
+     * base64转纹理
+     * @param data - base64编码的字符串
+     * @returns 纹理
+     */
+    public async base64ToTexture(data: string) {
+        return new Promise<any>((resolve, reject) => {
+            let img = new Image();
+            img.src = data;
+            img.onload(() => {
+                let texture = new cc.Texture2D();
+                texture.initWithElement(img);
+                texture.handleLoadedTexture();
+                resolve(texture);
+            })
+        })
+    }
+
+
+    /**
+     * base64转精灵
+     * @param data - base64编码的字符串
+     * @returns 精灵数据
+     */
+    public async base64ToSpriteFrame(data: string) {
+        let texture = await this.base64ToTexture(data);
+        return new cc.SpriteFrame(texture);
+    }
 
 
 }
