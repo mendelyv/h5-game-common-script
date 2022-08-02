@@ -42,12 +42,28 @@ class AssetManager {
      * @param path - 资源路径，规则为: bundleName://assetName，缺省bundleName为resources
      * @returns 资源对象
      */
-    public async load<T extends cc.Asset>(path: string): Promise<T> {
+    public async load<T extends cc.Asset>(path: string, cb?: Function): Promise<T> {
         let { bundleName, assetName } = this.parseAssetPath(path);
         let bundle = await this.getBundle(bundleName);
-        if (!bundle) return Promise.reject("ERROR Bundle");
+        if (!bundle) {
+            if (cb) {
+                cb(`ERROR Bundle: ${bundleName}`, null);
+            }
+            return Promise.reject(`ERROR Bundle: ${bundleName}`);
+        }
         let asset = bundle.get(assetName);
-        if (asset) return Promise.resolve(asset);
+        if (asset) {
+            if (cb) {
+                cb(null, asset);
+            }
+            return Promise.resolve(asset as T);
+        }
+        if (cb) {
+            bundle.load(assetName, (err, asset) => {
+                cb(err, asset);
+            });
+            return;
+        }
         return new Promise<T>((resolve, reject) => {
             bundle.load(assetName, (err, resource) => {
                 if (err) {
@@ -57,6 +73,18 @@ class AssetManager {
                 resolve(resource as T);
             });
         });
+    }
+
+
+    /**
+     * 预加载资源
+     * @param path - 资源路径，规则为: bundleName://assetName，缺省bundleName为resources
+     */
+    public async preload(path: string) {
+        let { bundleName, assetName } = this.parseAssetPath(path);
+        let bundle = await this.getBundle(bundleName);
+        if (!bundle) return;
+        bundle.preload(assetName);
     }
 
 
