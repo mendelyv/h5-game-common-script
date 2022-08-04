@@ -65,6 +65,18 @@
 
 
     /**
+     * 获取一个范围内的随机数，[min, max]
+     * @param min - 最小值
+     * @param max - 最大值
+     * @param integer - 是否取整，缺省为true
+     * @returns 
+     */
+    public static randomRange(min: number, max: number, integer: boolean = true) {
+        return integer ? Math.floor(Math.random() * (max - min + 1)) + min : Math.random() * (max - min) + min;
+    }
+
+
+    /**
      * 生成富文本
      * @param str - 字符串
      * @param color - 颜色
