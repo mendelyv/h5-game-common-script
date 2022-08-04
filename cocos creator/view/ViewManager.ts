@@ -61,8 +61,8 @@ class ViewManager {
             if (preView) {
                 let preScript = this.getViewScript(preViewName);
                 if (preScript) {
-                    if (preScript["onHide"])
-                        preScript["onHide"]();
+                    if (preScript["onClose"])
+                        preScript["onClose"]();
                 }
             } else {
                 console.warn(`${preViewName} is not show, but viewOpenedArray has save, check it`);
@@ -121,8 +121,8 @@ class ViewManager {
             if (preView) {
                 let preScript = this.getViewScript(preViewName);
                 if (preScript) {
-                    if (preScript["onHide"])
-                        preScript["onHide"]();
+                    if (preScript["onClose"])
+                        preScript["onClose"]();
                 }
             } else {
                 console.warn(`${preViewName} is not show, but viewOpenedArray has save, check it`);
