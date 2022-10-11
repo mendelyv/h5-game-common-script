@@ -242,6 +242,7 @@
         h.component = scriptName;
         h.handler = functionName;
         h.customEventData = data;
+        button.clickEvents = [];
         button.clickEvents.push(h);
         return true;
     }
