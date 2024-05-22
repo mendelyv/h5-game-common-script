@@ -10,6 +10,7 @@ export default abstract class BehaviorNode {
 
 
     public state: EBehaviorState = EBehaviorState.NONE;
+    public priority: number = 0;
 
 
     public abstract update(): EBehaviorState;

@@ -50,7 +50,9 @@ export default class BehaviorTreeBuilder {
             console.log(" ===== action5 sequence ===== ");
             return EBehaviorState.SUCCESS;
         });
+        action5.priority = 100;
         selector.addChild(action5);
+        selector.sortChildren();
         root.addChild(selector);
 
         let parallel = new BehaviorParallel();

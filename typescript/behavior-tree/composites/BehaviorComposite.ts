@@ -32,5 +32,13 @@ export default abstract class BehaviorComposite extends BehaviorNode {
     }
 
 
+    /* 根据节点优先级排序节点 */
+    public sortChildren(): void {
+        this.children.sort((a, b) => {
+            return b.priority - a.priority;
+        });
+    }
+
+
     // class end
 }
