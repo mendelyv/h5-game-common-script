@@ -53,5 +53,58 @@ export default class ArrayUtils {
     }
 
 
+    /**
+     * 获取二维数组连续数据的边界点
+     * @param matrix - 
+     * @param value - 
+     * @returns 
+     */
+    public static findBoundaries(matrix: Array<Array<number>>, value: number): Array<Array<number>> {
+        let directions = [[-1, 0], [1, 0], [0, -1], [0, 1],];
+        const rows = matrix.length;
+        const cols = matrix[0].length;
+        const visited = Array.from({ length: rows }, () => Array(cols).fill(false));
+        const boundaries: Array<Array<number>> = [];
+
+        function isBoundary(x: number, y: number): boolean {
+            // 如果相邻点不是目标值或者越界，当前点是边界
+            for (const [dx, dy] of directions) {
+                const nx = x + dx;
+                const ny = y + dy;
+                if (nx < 0 || nx >= rows || ny < 0 || ny >= cols || matrix[nx][ny] !== value) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function dfs(x: number, y: number) {
+            visited[x][y] = true;
+            let boundary = [x, y];
+            if (isBoundary(x, y)) {
+                boundaries.push(boundary);
+            }
+
+            for (const [dx, dy] of directions) {
+                const nx = x + dx;
+                const ny = y + dy;
+                if (nx >= 0 && nx < rows && ny >= 0 && ny < cols && !visited[nx][ny] && matrix[nx][ny] === value) {
+                    dfs(nx, ny);
+                }
+            }
+        }
+
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                if (matrix[i][j] === value && !visited[i][j]) {
+                    dfs(i, j);
+                }
+            }
+        }
+
+        return boundaries;
+    }
+
+
     // class end
 }
