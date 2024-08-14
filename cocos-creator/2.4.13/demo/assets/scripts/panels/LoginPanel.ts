@@ -1,8 +1,9 @@
 import Utils from "../../libs/utils/Utils";
 import BaseView from "../../libs/view/BaseView";
 import { LayerType } from "../../libs/view/LayerManager";
+import { register } from "../../libs/view/ViewConst";
 
-const {ccclass, property} = cc._decorator;
+const { ccclass, property } = cc._decorator;
 
 @ccclass
 export default class LoginPanel extends BaseView {
@@ -31,3 +32,5 @@ export default class LoginPanel extends BaseView {
 
     // class end
 }
+
+register({ id: 1, viewCls: LoginPanel, layer: LayerType.main_view, });

@@ -1,6 +1,7 @@
 import { LayerType } from "./LayerManager";
 import { eventManager } from "../event/EventManager";
 import Utils from "../utils/Utils";
+import { viewManager } from "./ViewManager";
 
 
 /**
@@ -28,7 +29,7 @@ export default class BaseView extends cc.Component {
     /** 界面恢复回调 */
     public onResume(params?: unknown) { }
     public onClose(params?: unknown) { }
-    public onDestory() { }
+    public onDestroy() { }
     /**
      * 添加按钮点击事件
      * @param target - 按钮
@@ -105,5 +106,8 @@ export default class BaseView extends cc.Component {
         let screenHeight = document.body.offsetHeight;
         if (screenHeight < designHeight) return true;
         return false;
+    }
+    public close() {
+        viewManager.close(this);
     }
 }

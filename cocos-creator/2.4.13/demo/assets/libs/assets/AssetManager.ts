@@ -19,14 +19,14 @@ export default class AssetManager {
      * @param nameOrUrl - bundle路径
      * @returns bundle对象
      */
-    public getBundle(nameOrUrl: string) {
-        if (!nameOrUrl || nameOrUrl === "") return Promise.reject("ERROR Bundle name");
+    public getBundle(nameOrUrl: string): Promise<cc.AssetManager.Bundle> {
+        if (!nameOrUrl || nameOrUrl === "") return Promise.reject(" ***** ERROR Bundle name ***** ");
         const bundle = cc.assetManager.getBundle(nameOrUrl);
         if (bundle) { return Promise.resolve(bundle); }
         return new Promise<cc.AssetManager.Bundle>((resolve, reject) => {
             cc.assetManager.loadBundle(nameOrUrl, (err, bundle) => {
                 if (err) {
-                    console.error(`load bundle ${nameOrUrl} error: ${err}`);
+                    console.error(` ***** load bundle ${nameOrUrl} error: ${err} ***** `);
                     reject(err);
                 }
 
@@ -43,13 +43,15 @@ export default class AssetManager {
      * @returns 资源对象
      */
     public async load<T extends cc.Asset>(path: string, cb?: Function): Promise<T> {
-        let { bundleName, assetName } = this.parseAssetPath(path);
+        let pathResult = this.parseAssetPath(path);
+        if (pathResult == null) return Promise.reject(` ***** ERROR Bundle: ${path} ***** `);
+        let { bundleName, assetName } = pathResult;
         let bundle = await this.getBundle(bundleName);
         if (!bundle) {
             if (cb) {
-                cb(`ERROR Bundle: ${bundleName}`, null);
+                cb(` ***** ERROR Bundle: ${bundleName} ***** `, null);
             }
-            return Promise.reject(`ERROR Bundle: ${bundleName}`);
+            return Promise.reject(` ***** ERROR Bundle: ${bundleName} ***** `);
         }
         let asset = bundle.get(assetName);
         if (asset) {
@@ -67,7 +69,7 @@ export default class AssetManager {
         return new Promise<T>((resolve, reject) => {
             bundle.load(assetName, (err: unknown, resource: unknown) => {
                 if (err) {
-                    console.error(`load asset ${path} error: ${err}`);
+                    console.error(` ***** load asset ${path} error: ${err} ***** `);
                     reject(err);
                 }
                 resolve(resource as T);
@@ -81,7 +83,9 @@ export default class AssetManager {
      * @param path - 资源路径，规则为: bundleName://assetName，缺省bundleName为resources
      */
     public async preload(path: string) {
-        let { bundleName, assetName } = this.parseAssetPath(path);
+        let pathResult = this.parseAssetPath(path);
+        if (pathResult == null) return Promise.reject(` ***** ERROR Bundle: ${path} ***** `);
+        let { bundleName, assetName } = pathResult;
         let bundle = await this.getBundle(bundleName);
         if (!bundle) return;
         bundle.preload(assetName);
@@ -95,17 +99,11 @@ export default class AssetManager {
      */
     private parseAssetPath(path: string) {
         let bundleName: string, assetName: string;
-        if (path.indexOf("://") <= 0) {
-            bundleName = "resources";
-            assetName = path;
-        } else if (path.indexOf("/") <= 0) {
-            bundleName = path;
-            assetName = "";
-        } else {
-            let regexArr = path.match(/^(.+?):\/\/(.+?)\/(.+?)$/);
-            bundleName = regexArr[1];
-            assetName = regexArr[3];
-        }
+        let regex = /(.*):\/\/(.*)/;
+        let regexArr = path.match(regex);
+        if (regexArr == null || regexArr.length <= 0) return null;
+        bundleName = regexArr[1];
+        assetName = regexArr[2];
         return { bundleName, assetName };
     }
 
@@ -116,7 +114,9 @@ export default class AssetManager {
      * @param releaseBundle - 是否释放bundle，缺省为false
      */
     public release(path: string, releaseBundle: boolean = false) {
-        let { bundleName, assetName } = this.parseAssetPath(path);
+        let pathResult = this.parseAssetPath(path);
+        if (pathResult == null) return Promise.reject(` ***** ERROR Bundle: ${path} ***** `);
+        let { bundleName, assetName } = pathResult;
         let bundle = cc.assetManager.getBundle(bundleName);
         if (!bundle) return;
         if (!releaseBundle) {
@@ -157,7 +157,7 @@ export default class AssetManager {
      */
     public async createPrefab(prefabPath: string): Promise<cc.Node> {
         let p = await this.load<cc.Prefab>(prefabPath);
-        return cc.instantiate(p) as any;
+        return cc.instantiate(p);
     }
 
 
@@ -167,7 +167,7 @@ export default class AssetManager {
      * @returns 纹理
      */
     public async base64ToTexture(data: string) {
-        return new Promise<any>((resolve, reject) => {
+        return new Promise<cc.Texture2D>((resolve, reject) => {
             let img = new Image();
             img.src = data;
             img.onload = (event) => {
@@ -191,6 +191,8 @@ export default class AssetManager {
     }
 
 
+    // class end
 }
+
 export const assetManager = AssetManager.instance;
 window["assetManager"] = assetManager;

@@ -8,6 +8,16 @@ export default class StringUtils {
 
 
     /**
+     * 判断空字符串
+     * @param str - 
+     * @returns 
+     */
+    public static empty(str: string): boolean {
+        return str == null || str == "" || str.length <= 0;
+    }
+
+
+    /**
      * 生成富文本
      * @param str - 字符串
      * @param color - 颜色
