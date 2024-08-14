@@ -92,5 +92,43 @@ export default class Utils {
     }
 
 
+    /**
+     * 查看类是否被ccclass修饰
+     * @param constructor - 
+     * @returns 
+     */
+    public static isCCClass(constructor: unknown): boolean {
+        return constructor && constructor.hasOwnProperty("__ctors__");
+    }
+
+
+    /**
+     * 节点控制脚本挂载
+     * @param node - 
+     * @param script - 
+     */
+    public static addNodeScript(node: cc.Node, script: string): void;
+    public static addNodeScript(node: cc.Node, script: unknown): void;
+    public static addNodeScript(node: cc.Node, script: unknown): void {
+        if (typeof script == "string") {
+            let hasCls = cc.js.getClassByName(script);
+            if (hasCls == null) {
+                console.error(` ***** ${script} does not decorated by ccclass ***** `);
+                return;
+            }
+            let has = node.getComponent(script) != null;
+            if (!has) node.addComponent(script);
+        }
+        else if (typeof script == "function") {
+            if (!this.isCCClass(script)) {
+                console.error(` ***** ${script} does not decorated by ccclass ***** `);
+                return;
+            }
+            let has = node.getComponent(script as { prototype: cc.Component }) != null;
+            if (!has) node.addComponent(script as (new () => cc.Component));
+        }
+    }
+
+
     // class end
 }

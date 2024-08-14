@@ -62,7 +62,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "LoginPanel",
+    "_name": "NewPanelPrefab",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1

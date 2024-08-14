@@ -6,6 +6,8 @@ import ViewTree from "./ViewTree";
 import ViewRegisterDto from "./ViewRegisterDto";
 import ViewTreeNode from "./ViewTreeNode";
 import StringUtils from "../utils/StringUtils";
+import Utils from "../utils/Utils";
+import LoginPanel from "../../scripts/panels/LoginPanel";
 
 
 /**
@@ -133,7 +135,7 @@ export class ViewManager {
             }
             node.name = className;
             this.viewNodes[viewDto.id] = node;
-            this.analyzeViewScript(node, className);
+            Utils.addNodeScript(node, viewDto.viewCls);
             this.addBlockInputEvent(node);
         }
 
@@ -249,17 +251,6 @@ export class ViewManager {
             // console.warn(`${className} has not view controller`);
         }
         return node;
-    }
-
-
-    /**
-     * 辅助界面预制体控制脚本挂载
-     * @param node - 
-     * @param scriptName - 
-     */
-    private analyzeViewScript(node: cc.Node, scriptName: string) {
-        let has = node.getComponent(scriptName) != null;
-        if (!has) node.addComponent(scriptName);
     }
 
 
