@@ -8,7 +8,7 @@ const registeredViewDictionary: { [key: number | string]: ViewRegisterDto } = {}
 /** 界面注册字典集，key为注册数据的类名 */
 const registeredviewDictionaryByName: { [className: string]: ViewRegisterDto } = {};
 
-export function register(dto: ViewRegisterDto) {
+export function registerView(dto: ViewRegisterDto) {
     let className = cc.js.getClassName(dto.viewCls);
     if (dto.id == null) dto.id = className;
     registeredViews.push(dto);

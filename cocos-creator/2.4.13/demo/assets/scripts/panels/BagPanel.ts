@@ -1,7 +1,9 @@
+import { registerRed } from "../../libs/commons/red/RedConst";
+import { RedType } from "../../libs/commons/red/RedType";
 import ScrollViewController from "../../libs/commons/scroll/ScrollViewController";
 import BaseView from "../../libs/view/BaseView";
 import { LayerType } from "../../libs/view/LayerManager";
-import { register } from "../../libs/view/ViewConst";
+import { registerView } from "../../libs/view/ViewConst";
 import MainPanel from "./MainPanel";
 
 const { ccclass, property } = cc._decorator;
@@ -32,4 +34,5 @@ export default class BagPanel extends BaseView {
 
 
 }
-register({ viewCls: BagPanel, layer: LayerType.main_view, parent: MainPanel });
+registerView({ viewCls: BagPanel, layer: LayerType.main_view, parent: MainPanel });
+registerRed({ type: RedType.bag_panel, parent: RedType.main_panel });

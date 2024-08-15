@@ -1,7 +1,7 @@
 import Utils from "../../libs/utils/Utils";
 import BaseView from "../../libs/view/BaseView";
 import { LayerType } from "../../libs/view/LayerManager";
-import { register } from "../../libs/view/ViewConst";
+import { registerView } from "../../libs/view/ViewConst";
 import { viewManager } from "../../libs/view/ViewManager";
 import MainPanel from "./MainPanel";
 
@@ -30,4 +30,4 @@ export default class LoginPanel extends BaseView {
     // class end
 }
 
-register({ viewCls: LoginPanel, layer: LayerType.main_view, });
+registerView({ viewCls: LoginPanel, layer: LayerType.main_view, });

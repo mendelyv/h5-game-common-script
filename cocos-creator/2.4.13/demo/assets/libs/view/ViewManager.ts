@@ -29,7 +29,7 @@ export class ViewManager {
     private viewOpenedArray: ViewRegisterDto[] = [];
 
 
-    public get tree(): ViewTree { return this._tree; }
+    public get tree(): ViewTree { return this._tree; };
 
 
     public init(): void {
