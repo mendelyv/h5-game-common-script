@@ -14,7 +14,7 @@ export default class Utils {
      * @param targetNode 
      * @param name 
      */
-    public static FindChildByName(targetNode: cc.Node, name: string): cc.Node {
+    public static FindChildByName(targetNode: cc.Node, name: unknown): cc.Node {
         if (!targetNode.children || targetNode.children.length <= 0) return null;
         for (let i = 0; i < targetNode.children.length; i++) {
             const child = targetNode.children[i];

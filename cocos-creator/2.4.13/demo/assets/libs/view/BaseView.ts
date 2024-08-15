@@ -2,6 +2,7 @@ import { LayerType } from "./LayerManager";
 import { eventManager } from "../event/EventManager";
 import Utils from "../utils/Utils";
 import { viewManager } from "./ViewManager";
+import BaseComponent from "../commons/BaseComponent";
 
 
 /**
@@ -10,7 +11,7 @@ import { viewManager } from "./ViewManager";
  * @author : Ran
  * @time : 2022.07.19
  */
-export default class BaseView extends cc.Component {
+export default class BaseView extends BaseComponent {
     /** 添加的界面层级 */
     public static LAYER: LayerType;
     /** 预制体路径 */
@@ -21,7 +22,7 @@ export default class BaseView extends cc.Component {
     public adapterScaleNodes: cc.Node[] = [];
     /** 适配约束节点 */
     public adapterWidgetNodes: cc.Node[] = [];
-    start() {
+    protected start(): void {
         this.screenAdapter();
     }
     /** 界面开启回调 */
@@ -30,44 +31,6 @@ export default class BaseView extends cc.Component {
     public onResume(params?: unknown) { }
     public onClose(params?: unknown) { }
     public onDestroy() { }
-    /**
-     * 添加按钮点击事件
-     * @param target - 按钮
-     * @param functionName - 回调函数名
-     * @param data - 回调参数
-     * @param scriptNode - 脚本节点
-     * @param scriptName - 脚本名称
-     * @returns 
-     */
-    public addButtonHandler(target: cc.Node | cc.Button, functionName: string, data?: unknown, scriptNode?: cc.Node, scriptName?: string) {
-        if (!scriptNode) scriptNode = this.node;
-        if (!scriptNode) {
-            console.error(`${cc.js.getClassName(this)}.addButtonClickHandler: scriptNode is null`);
-            return false;
-        }
-        if (!scriptName || scriptName == "") scriptName = cc.js.getClassName(this);
-        if (!scriptName || scriptName == "") {
-            console.error(`${cc.js.getClassName(this)}.addButtonClickHandler: scriptName is null`);
-            return false;
-        }
-        return Utils.addButtonClickHandler(target, scriptNode, scriptName, functionName, data);
-    }
-    /**
-     * 添加事件
-     * @param type - 
-     * @param cb - 
-     */
-    public addEvent(type: number | string, cb: Function) {
-        eventManager.addEvent(type, cb, this);
-    }
-    /**
-     * 移除事件
-     * @param type - 
-     * @param cb - 
-     */
-    public removeEvent(type: number | string, cb: Function) {
-        eventManager.removeEvent(type, cb, this);
-    }
     /**
      * 获取层级节点
      * @returns 
