@@ -36,15 +36,8 @@ export default class ScrollViewController extends cc.Component {
 
 
     protected inited: boolean;
-    protected renderLoaded: boolean = false;
     protected _data: unknown[];
     public set data(data: unknown[]) {
-        // let range = this.getVisibleRange();
-        // this.recycleRendersByRange(range);
-        if (!this.render && this.renderLoaded) {
-            console.error(" ***** render is null, please set in component panel or use setRender function ***** ");
-            return;
-        }
         this._data = data;
         this.visibleIndexRange[0] = this.visibleIndexRange[1] = -1;
         this.onScrolling();
@@ -110,7 +103,7 @@ export default class ScrollViewController extends cc.Component {
 
 
     protected onScrolling() {
-        if (this.render == null || !this.renderLoaded) return;
+        if (this.render == null) return;
         let range = this.getVisibleRange();
         if (this.checkNeedUpdate(range)) {
             this.recycleRendersByRange(range);
@@ -129,15 +122,19 @@ export default class ScrollViewController extends cc.Component {
         if (this.render != null) {
             this.render.destroy();
             this.render = null;
-            this.renderLoaded = false;
         }
         if (render instanceof cc.Prefab)
             this.render = render;
         else if (typeof render == "string") {
             this.render = await assetManager.load<cc.Prefab>(render);
-            this.renderLoaded = true;
         }
+        this.onPrefabLoadComplete();
+    }
+
+
+    protected onPrefabLoadComplete() {
         this.initRender();
+        this.onScrolling();
     }
 
 
