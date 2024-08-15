@@ -1,8 +1,7 @@
-import { LayerType } from "./LayerManager";
-import { eventManager } from "../event/EventManager";
-import Utils from "../utils/Utils";
 import { viewManager } from "./ViewManager";
 import BaseComponent from "../commons/BaseComponent";
+import ViewTreeNode from "./ViewTreeNode";
+import { getViewRegisterDto } from "./ViewConst";
 
 
 /**
@@ -11,13 +10,7 @@ import BaseComponent from "../commons/BaseComponent";
  * @author : Ran
  * @time : 2022.07.19
  */
-export default class BaseView extends BaseComponent {
-    /** 添加的界面层级 */
-    public static LAYER: LayerType;
-    /** 预制体路径 */
-    public static prefabPath: string;
-    /** 预制体名称 */
-    public prefabName: string;
+export default abstract class BaseView extends BaseComponent {
     /** 适配缩放节点 */
     public adapterScaleNodes: cc.Node[] = [];
     /** 适配约束节点 */
@@ -72,5 +65,31 @@ export default class BaseView extends BaseComponent {
     }
     public close() {
         viewManager.close(this);
+    }
+    /**
+     * 获取视图树父节点
+     * @returns 
+     */
+    public getParentNode(): ViewTreeNode {
+        let register = getViewRegisterDto(this);
+        let node = viewManager.tree.getNode(register);
+        if (node == null) {
+            console.error(` ***** ${this.name} is not register to the tree ***** `);
+            return null;
+        }
+        return node.parent;
+    }
+    /**
+     * 获取视图树子节点
+     * @returns 
+     */
+    public getChildrenNodes(): ViewTreeNode[] {
+        let register = getViewRegisterDto(this);
+        let node = viewManager.tree.getNode(register);
+        if (node == null) {
+            console.error(` ***** ${this.name} is not register to the tree ***** `);
+            return null;
+        }
+        return node.children;
     }
 }

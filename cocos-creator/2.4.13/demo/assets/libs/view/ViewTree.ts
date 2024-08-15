@@ -1,3 +1,4 @@
+import { getViewRegisterDto } from "./ViewConst";
 import ViewRegisterDto from "./ViewRegisterDto";
 import ViewTreeNode from "./ViewTreeNode";
 
@@ -14,6 +15,8 @@ export default class ViewTree {
     /** 界面id字典，方便索引 */
     private dictionary: { [key: number | string]: ViewTreeNode };
     private parentWaitQueue: { [key: number | string]: ViewTreeNode[] };
+
+
     public generate(views: ViewRegisterDto[]): void {
         this.root = new ViewTreeNode();
         this.dictionary = {};
@@ -25,7 +28,7 @@ export default class ViewTree {
     }
 
 
-    public addDictionary(id: number | string, node: ViewTreeNode) {
+    protected addDictionary(id: number | string, node: ViewTreeNode) {
         this.dictionary[id] = node;
         if (this.parentWaitQueue[id] != null) {
             let parent = this.dictionary[id];
@@ -47,11 +50,12 @@ export default class ViewTree {
             node.parent = this.root;
             this.root.addChild(node);
         } else {
-            let parent = this.getNode(dto.parent);
+            let parentRegisterDto = getViewRegisterDto(dto.parent);
+            let parent = this.dictionary[parentRegisterDto.id];
             if (parent == null) {
-                if (this.parentWaitQueue[dto.parent] == null)
-                    this.parentWaitQueue[dto.parent] = [];
-                this.parentWaitQueue[dto.parent].push(node);
+                if (this.parentWaitQueue[parentRegisterDto.id] == null)
+                    this.parentWaitQueue[parentRegisterDto.id] = [];
+                this.parentWaitQueue[parentRegisterDto.id].push(node);
             } else {
                 parent.addChild(node);
             }
@@ -62,11 +66,11 @@ export default class ViewTree {
 
     public getNode(dto: ViewRegisterDto): ViewTreeNode;
     public getNode(id: number | string): ViewTreeNode;
-    public getNode(dto: unknown): ViewTreeNode {
-        if (typeof dto == 'number' || typeof dto == 'string')
-            return this.dictionary[dto];
-        else if (typeof dto == "object")
-            return this.dictionary[(dto as ViewRegisterDto).id];
+    public getNode(value: unknown): ViewTreeNode {
+        if (typeof value == 'number' || typeof value == 'string')
+            return this.dictionary[value];
+        else if (typeof value == "object")
+            return this.dictionary[(value as ViewRegisterDto).id];
     }
 
 

@@ -10,23 +10,24 @@ export default class ViewTreeNode {
 
 
     public parent: ViewTreeNode = null;
-    protected children: ViewTreeNode[] = [];
+    protected _children: ViewTreeNode[] = [];
+    public get children(): ViewTreeNode[] { return this._children; };
     public data: ViewRegisterDto = null;
 
 
     public addChild(child: ViewTreeNode): ViewTreeNode {
-        this.children.push(child);
+        this._children.push(child);
         return child;
     }
 
 
     public destroy(): void {
-        if (this.children.length > 0) {
-            for (let i = 0; i < this.children.length; i++) {
-                this.children[i].destroy();
+        if (this._children.length > 0) {
+            for (let i = 0; i < this._children.length; i++) {
+                this._children[i].destroy();
             }
         }
-        this.children = null;
+        this._children = null;
         this.parent = null;
         this.data = null;
     }

@@ -1,8 +1,8 @@
 import ScrollViewController from "../../libs/commons/scroll/ScrollViewController";
-import Utils from "../../libs/utils/Utils";
 import BaseView from "../../libs/view/BaseView";
 import { LayerType } from "../../libs/view/LayerManager";
 import { register } from "../../libs/view/ViewConst";
+import MainPanel from "./MainPanel";
 
 const { ccclass, property } = cc._decorator;
 
@@ -32,4 +32,4 @@ export default class BagPanel extends BaseView {
 
 
 }
-register({ viewCls: BagPanel, layer: LayerType.main_view });
+register({ viewCls: BagPanel, layer: LayerType.main_view, parent: MainPanel });

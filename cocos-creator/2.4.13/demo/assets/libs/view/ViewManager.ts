@@ -1,13 +1,11 @@
 import { assetManager } from "../assets/AssetManager";
 import BaseView from "./BaseView";
 import LayerManager from "./LayerManager";
-import ViewConst, { getRegisteredViews } from "./ViewConst";
+import ViewConst, { getRegisteredViews, getViewRegisterDto } from "./ViewConst";
 import ViewTree from "./ViewTree";
 import ViewRegisterDto from "./ViewRegisterDto";
-import ViewTreeNode from "./ViewTreeNode";
 import StringUtils from "../utils/StringUtils";
 import Utils from "../utils/Utils";
-import LoginPanel from "../../scripts/panels/LoginPanel";
 
 
 /**
@@ -26,57 +24,18 @@ export class ViewManager {
     }
 
 
-    private tree: ViewTree;
-    private viewDictionary: { [key: number | string]: ViewRegisterDto };
-    private viewDictionaryByName: { [className: string]: ViewRegisterDto };
-    private viewNodes: { [viewID: number]: cc.Node } = {};
+    private _tree: ViewTree;
+    private viewNodes: { [id: number]: BaseView } = {};
     private viewOpenedArray: ViewRegisterDto[] = [];
+
+
+    public get tree(): ViewTree { return this._tree; }
 
 
     public init(): void {
         let views = getRegisteredViews();
-        this.viewDictionary = {};
-        this.viewDictionaryByName = {};
-        for (let i = 0; i < views.length; i++) {
-            let view = views[i];
-            this.viewDictionary[view.id] = view;
-            let className = this.getViewClassName(view.viewCls);
-            this.viewDictionaryByName[className] = view;
-        }
-        this.tree = new ViewTree();
-        this.tree.generate(views);
-    }
-
-
-    /**
-     * 获取界面注册数据
-     * @param value - 界面类
-     * @returns 
-     */
-    public getViewRegisterDto(value: unknown): ViewRegisterDto;
-    /**
-     * 获取界面注册数据
-     * @param value - 界面字符串id
-     * @returns 
-     */
-    public getViewRegisterDto(value: string): ViewRegisterDto;
-    /**
-     * 获取界面注册数据
-     * @param value - 界面数字id
-     * @returns 
-     */
-    public getViewRegisterDto(value: number): ViewRegisterDto;
-    public getViewRegisterDto(value: unknown): ViewRegisterDto {
-        let dto = null;
-        if (typeof value == "number" || typeof value == "string") {
-            dto = this.viewDictionary[value];
-            if (dto != null) return dto;
-            dto = this.viewDictionaryByName[value];
-        } else if (typeof value == "function") {
-            let className = this.getViewClassName(value);
-            dto = this.viewDictionaryByName[className];
-        }
-        return dto;
+        this._tree = new ViewTree();
+        this._tree.generate(views);
     }
 
 
@@ -91,28 +50,28 @@ export class ViewManager {
     /**
      * 打开界面
      * @template T extends cc.Node = cc.Node - 
-     * @param cls - 界面字符串id
+     * @param viewName - 界面字符串id
      * @param params - 开启参数
      * @returns 界面节点
      */
-    public async open<T extends cc.Node = cc.Node>(viewID: string, params?: unknown): Promise<T>;
+    public async open<T extends cc.Node = cc.Node>(viewName: string, params?: unknown): Promise<T>;
     /**
      * 打开界面
      * @template T extends cc.Node = cc.Node - 
-     * @param cls - 界面数字id
+     * @param id - 界面数字id
      * @param params - 开启参数
      * @returns 界面节点
      */
-    public async open<T extends cc.Node = cc.Node>(viewID: number, params?: unknown): Promise<T>;
-    public async open<T extends cc.Node = cc.Node>(cls: unknown, params?: unknown): Promise<T> {
-        let viewDto: ViewRegisterDto = this.getViewRegisterDto(cls);
+    public async open<T extends cc.Node = cc.Node>(id: number, params?: unknown): Promise<T>;
+    public async open<T extends cc.Node = cc.Node>(v: unknown, params?: unknown): Promise<T> {
+        let viewDto: ViewRegisterDto = getViewRegisterDto(v);
         if (viewDto == null) {
-            console.error(` ***** view ${cls} has not registered ***** `);
+            console.error(` ***** view ${v} has not registered ***** `);
             return;
         }
 
         let index = this.getViewShowIndex(viewDto.id);
-        if (index > -1) return this.resume(cls) as T;
+        if (index > -1) return this.resume(v) as T;
 
         let className = this.getViewClassName(viewDto.viewCls);
         let prefabPathPrefix = viewDto.prefabPathPrefix;
@@ -187,23 +146,23 @@ export class ViewManager {
     /**
      * 恢复界面
      * @template T extends cc.Node = cc.Node - 
-     * @param viewID - 界面字符串id
+     * @param viewName - 界面字符串id
      * @param params - 开启参数
      * @returns 
      */
-    public resume<T extends cc.Node = cc.Node>(viewID: string, params?: unknown): T;
+    public resume<T extends cc.Node = cc.Node>(viewName: string, params?: unknown): T;
     /**
      * 恢复界面
      * @template T extends cc.Node = cc.Node - 
-     * @param viewID - 界面数字id
+     * @param id - 界面数字id
      * @param params - 开启参数
      * @returns 
      */
-    public resume<T extends cc.Node = cc.Node>(viewID: number, params?: unknown): T;
-    public resume<T extends cc.Node = cc.Node>(cls: unknown, params?: unknown): T {
-        let viewDto: ViewRegisterDto = this.getViewRegisterDto(cls);
+    public resume<T extends cc.Node = cc.Node>(id: number, params?: unknown): T;
+    public resume<T extends cc.Node = cc.Node>(v: unknown, params?: unknown): T {
+        let viewDto: ViewRegisterDto = getViewRegisterDto(v);
         if (viewDto == null) {
-            console.error(` ***** view ${cls} has not registered ***** `);
+            console.error(` ***** view ${v} has not registered ***** `);
             return;
         }
 
@@ -275,23 +234,23 @@ export class ViewManager {
     /**
      * 关闭界面
      * @template T extends cc.Node = cc.Node - 
-     * @param viewID - 界面字符串id
+     * @param viewName - 界面字符串id
      * @param params - 
      * @returns 
      */
-    public close<T extends cc.Node = cc.Node>(viewID: string, params?: unknown): T;
+    public close<T extends cc.Node = cc.Node>(viewName: string, params?: unknown): T;
     /**
      * 关闭界面
      * @template T extends cc.Node = cc.Node - 
-     * @param viewID - 界面数字id
+     * @param id - 界面数字id
      * @param params - 
      * @returns 
      */
-    public close<T extends cc.Node = cc.Node>(viewID: number, params?: unknown): T;
-    public close<T extends cc.Node = cc.Node>(cls: unknown, params?: unknown): T {
-        let viewDto: ViewRegisterDto = this.getViewRegisterDto(cls);
+    public close<T extends cc.Node = cc.Node>(id: number, params?: unknown): T;
+    public close<T extends cc.Node = cc.Node>(v: unknown, params?: unknown): T {
+        let viewDto: ViewRegisterDto = getViewRegisterDto(v);
         if (viewDto == null) {
-            console.error(` ***** view ${cls} has not registered ***** `);
+            console.error(` ***** view ${v} has not registered ***** `);
             return;
         }
 
@@ -327,21 +286,21 @@ export class ViewManager {
     public destroy(cls: unknown): void;
     /**
      * 销毁界面
-     * @param viewID - 界面数字id
+     * @param id - 界面数字id
      */
-    public destroy(viewID: number): void;
+    public destroy(id: number): void;
     /**
      * 销毁界面
-     * @param viewID - 界面字符串id
+     * @param viewName - 界面字符串id
      */
-    public destroy(viewID: string): void;
-    public destroy(cls: unknown): void {
-        let viewDto: ViewRegisterDto = this.getViewRegisterDto(cls);
+    public destroy(viewName: string): void;
+    public destroy(v: unknown): void {
+        let viewDto: ViewRegisterDto = getViewRegisterDto(v);
         if (viewDto == null) {
-            console.error(` ***** view ${cls} has not registered ***** `);
+            console.error(` ***** view ${v} has not registered ***** `);
             return;
         }
-        this.close(cls);
+        this.close(v);
         let className = this.getViewClassName(viewDto.viewCls);
         let script = this.getViewScript(viewDto);
         if (script) {
@@ -358,7 +317,7 @@ export class ViewManager {
     }
 
 
-    private getViewNode(dto: ViewRegisterDto) {
+    private getViewNode(dto: ViewRegisterDto): BaseView {
         return this.viewNodes[dto.id] || null;
     }
 
@@ -390,6 +349,11 @@ export class ViewManager {
     }
 
 
+    /**
+     * 获取界面显示队列index
+     * @param dto - 界面注册数据
+     * @returns 
+     */
     private getViewShowIndex(dto: ViewRegisterDto): number;
     /**
      * 获取界面显示队列index
@@ -399,46 +363,75 @@ export class ViewManager {
     private getViewShowIndex(cls: unknown): number;
     /**
      * 获取界面显示队列index
-     * @param viewID - 界面数字id
+     * @param id - 界面数字id
      * @returns 
      */
-    private getViewShowIndex(viewID: number): number;
+    private getViewShowIndex(id: number): number;
     /**
      * 获取界面显示队列index
-     * @param viewID - 界面字符串id
+     * @param viewName - 界面字符串id
      * @returns 
      */
-    private getViewShowIndex(viewID: string): number;
-    private getViewShowIndex(cls: unknown) {
-        if (typeof cls == "number" || typeof cls == "string") {
-            return this.getViewShowIndexByViewID(cls);
-        } else if (typeof cls == "function") {
-            let className = this.getViewClassName(cls);
+    private getViewShowIndex(viewName: string): number;
+    private getViewShowIndex(v: unknown) {
+        if (typeof v == "number" || typeof v == "string") {
+            return this.getViewShowIndexByViewID(v);
+        } else if (typeof v == "function") {
+            let className = this.getViewClassName(v);
             return this.getViewShowIndexByViewName(className);
-        } else if (typeof cls == "object") {
-            let id = (cls as ViewRegisterDto).id;
+        } else if (typeof v == "object") {
+            let id = (v as ViewRegisterDto).id;
             this.getViewShowIndexByViewID(id);
         }
         return -1;
     }
 
 
-    private getViewShowIndexByViewName(className: string): number {
-        for (let i = 0; i < this.viewOpenedArray.length; i++) {
+    private getViewShowIndexByViewName(viewName: string): number {
+        for (let i = this.viewOpenedArray.length - 1; i >= 0; i--) {
             let view = this.viewOpenedArray[i];
             let name = this.getViewClassName(view.viewCls);
-            if (className == name) return i;
+            if (viewName == name) return i;
         }
         return -1;
     }
 
 
-    private getViewShowIndexByViewID(viewID: number | string): number {
-        for (let i = 0; i < this.viewOpenedArray.length; i++) {
+    private getViewShowIndexByViewID(id: number | string): number {
+        for (let i = this.viewOpenedArray.length - 1; i >= 0; i--) {
             let view = this.viewOpenedArray[i];
-            if (view.id == viewID) return i;
+            if (view.id == id) return i;
         }
         return -1;
+    }
+
+
+    /**
+     * 获取界面显示对象
+     * @template T extends BaseView = BaseView - 
+     * @param cls - 界面类
+     * @returns 
+     */
+    public getView<T extends BaseView = BaseView>(cls: unknown): T;
+    /**
+     * 获取界面显示对象
+     * @template T extends BaseView = BaseView - 
+     * @param id - 界面数字id
+     * @returns 
+     */
+    public getView<T extends BaseView = BaseView>(id: number): T;
+    /**
+     * 获取界面显示对象
+     * @template T extends BaseView = BaseView - 
+     * @param viewName - 界面字符串id
+     * @returns 
+     */
+    public getView<T extends BaseView = BaseView>(viewName: string): T;
+    public getView<T extends BaseView = BaseView>(v: unknown): T {
+        let index = this.getViewShowIndex(v);
+        if (index < 0) return null;
+        let register = this.viewOpenedArray[index];
+        return this.getViewNode(register) as T;
     }
 
 

@@ -10,7 +10,7 @@ export default class ViewRegisterDto {
     /** 界面id，数字界面id或者字符串界面id，缺省类名字符串id */
     public id?: number | string;
     /** 父级id，缺省则挂到root下 */
-    public parent?: number | string;
+    public parent?: number | string | unknown;
     /** 界面类 */
     public viewCls: { prototype: cc.Component };
     /** 界面层级 */
