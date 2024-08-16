@@ -1,4 +1,5 @@
-import { registerRed } from "../../libs/commons/red/RedConst";
+import { registerRed, registerReds } from "../../libs/commons/red/RedConst";
+import RedDisplayDto from "../../libs/commons/red/RedDisplayDto";
 import { RedType } from "../../libs/commons/red/RedType";
 import BaseView from "../../libs/view/BaseView";
 import { LayerType } from "../../libs/view/LayerManager";
@@ -33,3 +34,4 @@ export default class MainPanel extends BaseView {
 }
 registerView({ viewCls: MainPanel, layer: LayerType.main_view });
 registerRed({ type: RedType.main_panel });
+registerReds(RedType.main_panel, [RedType.bag_panel,]);

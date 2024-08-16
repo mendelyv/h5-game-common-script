@@ -1,19 +1,19 @@
 import RedRegisterDto from "./RedRegisterDto";
 import { RedType } from "./RedType";
 
-export default class RedNode {
+export default class RedTreeNode {
 
 
     public type: RedType = RedType.none;
-    protected _children: RedNode[] = [];
-    public parent: RedNode = null;
+    protected _children: RedTreeNode[] = [];
+    public parent: RedTreeNode = null;
     public data: RedRegisterDto = null;
 
 
-    public get children(): RedNode[] { return this._children; };
+    public get children(): RedTreeNode[] { return this._children; };
 
 
-    public addChild(child: RedNode): RedNode {
+    public addChild(child: RedTreeNode): RedTreeNode {
         this._children.push(child);
         return child;
     }

@@ -35,4 +35,4 @@ export default class BagPanel extends BaseView {
 
 }
 registerView({ viewCls: BagPanel, layer: LayerType.main_view, parent: MainPanel });
-registerRed({ type: RedType.bag_panel, parent: RedType.main_panel });
+// registerRed({ type: RedType.bag_panel, parent: RedType.main_panel });

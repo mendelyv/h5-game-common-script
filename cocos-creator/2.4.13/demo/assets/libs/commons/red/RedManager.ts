@@ -1,3 +1,4 @@
+import { eventManager } from "../../event/EventManager";
 import { getRegisteredReds } from "./RedConst";
 import RedTree from "./RedTree";
 import { RedType } from "./RedType";
@@ -32,7 +33,9 @@ export class RedManager {
     public change(type: RedType, value: boolean): void {
         let node = this._tree.getNode(type);
         if (node == null) return;
+        if (node.data.value == value) return;
         node.data.value = value;
+        eventManager.dispatch("red_state_update", type);
     }
 
 

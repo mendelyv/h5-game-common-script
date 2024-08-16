@@ -11,14 +11,13 @@ import ViewTreeNode from "./ViewTreeNode";
 export default class ViewTree {
 
 
-    private root: ViewTreeNode;
+    private root: ViewTreeNode = new ViewTreeNode();
     /** 界面id字典，方便索引 */
-    private dictionary: { [key: number | string]: ViewTreeNode };
-    private parentWaitQueue: { [key: number | string]: ViewTreeNode[] };
+    private dictionary: { [key: number | string]: ViewTreeNode } = {};
+    private parentWaitQueue: { [key: number | string]: ViewTreeNode[] } = {};
 
 
     public generate(views: ViewRegisterDto[]): void {
-        this.root = new ViewTreeNode();
         this.dictionary = {};
         this.parentWaitQueue = {};
         for (let i = 0; i < views.length; i++) {

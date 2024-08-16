@@ -1,7 +1,8 @@
 import { eventManager } from "../event/EventManager";
 import Utils from "../utils/Utils";
+import RedComponent from "./red/RedComponent";
 
-export default abstract class BaseComponent extends cc.Component {
+export default abstract class BaseComponent extends RedComponent {
     /**
      * 查找子节点
      * @param name - 子节点名称

@@ -2,6 +2,7 @@ import { viewManager } from "./ViewManager";
 import BaseComponent from "../commons/BaseComponent";
 import ViewTreeNode from "./ViewTreeNode";
 import { getViewRegisterDto } from "./ViewConst";
+import RedDisplayDto from "../commons/red/RedDisplayDto";
 
 
 /**

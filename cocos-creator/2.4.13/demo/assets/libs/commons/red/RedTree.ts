@@ -5,13 +5,12 @@ import { RedType } from "./RedType";
 export default class RedTree {
 
 
-    protected root: RedTreeNode;
-    private dictionary: { [type: number]: RedTreeNode };
-    private parentWatiQueue: { [type: number]: RedTreeNode[] };
+    protected root: RedTreeNode = new RedTreeNode();
+    private dictionary: { [type: number]: RedTreeNode } = {};
+    private parentWatiQueue: { [type: number]: RedTreeNode[] } = {};
 
 
     public generate(reds: RedRegisterDto[]): void {
-        this.root = new RedTreeNode();
         this.dictionary = {};
         this.parentWatiQueue = {};
         for (let i = 0; i < reds.length; i++) {

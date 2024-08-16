@@ -12,7 +12,7 @@ export default class ViewRegisterDto {
     /** 父级id，缺省则挂到root下 */
     public parent?: number | string | unknown;
     /** 界面类 */
-    public viewCls: { prototype: cc.Component };
+    public viewCls: unknown;
     /** 界面层级 */
     public layer: LayerType;
     /** 预制体路径前缀，缺省常量 */
