@@ -5,14 +5,15 @@ import { RedType } from "./RedType";
 export default class RedTree {
 
 
-    protected root: RedTreeNode = new RedTreeNode();
-    private dictionary: { [type: number]: RedTreeNode } = {};
-    private parentWatiQueue: { [type: number]: RedTreeNode[] } = {};
+    protected root: RedTreeNode;
+    private dictionary: { [type: number]: RedTreeNode };
+    private parentWaitQueue: { [type: number]: RedTreeNode[] };
 
 
     public generate(reds: RedRegisterDto[]): void {
+        this.root = new RedTreeNode();
         this.dictionary = {};
-        this.parentWatiQueue = {};
+        this.parentWaitQueue = {};
         for (let i = 0; i < reds.length; i++) {
             let red = reds[i];
             this.addNodeByDto(red);
@@ -22,14 +23,14 @@ export default class RedTree {
 
     protected addDictionary(type: RedType, node: RedTreeNode) {
         this.dictionary[type] = node;
-        if (this.parentWatiQueue[type] != null) {
+        if (this.parentWaitQueue[type] != null) {
             let parent = this.dictionary[type];
-            let children = this.parentWatiQueue[type];
+            let children = this.parentWaitQueue[type];
             for (let i = 0; i < children.length; i++) {
                 let child = children[i];
                 parent.addChild(child);
             }
-            delete this.parentWatiQueue[type];
+            delete this.parentWaitQueue[type];
         }
     }
 
@@ -44,9 +45,9 @@ export default class RedTree {
         } else {
             let parent = this.dictionary[dto.parent];
             if (parent == null) {
-                if (this.parentWatiQueue[dto.parent] == null)
-                    this.parentWatiQueue[dto.parent] = [];
-                this.parentWatiQueue[dto.parent].push(node);
+                if (this.parentWaitQueue[dto.parent] == null)
+                    this.parentWaitQueue[dto.parent] = [];
+                this.parentWaitQueue[dto.parent].push(node);
             } else {
                 parent.addChild(node);
             }
