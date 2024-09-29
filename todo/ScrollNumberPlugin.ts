@@ -32,6 +32,7 @@ module mvc {
         protected _defaultDuration: number = 75;
         /** 模仿进位的效果 */
         protected _carryBitLikeON: boolean = true;
+        protected _labelStyle: LabelStyle;
 
 
         constructor(parent: Laya.Sprite, value: number) {
@@ -109,6 +110,7 @@ module mvc {
             let nnn = this._numberPool.pop();
             if (nnn == null) {
                 nnn = new ScrollSingleNumberPlugin(this._parent, value);
+                if (this._labelStyle != null) nnn.setLabelStyle(this._labelStyle);
             }
             nnn.completeRecycle = false;
             return nnn;
@@ -319,6 +321,14 @@ module mvc {
         public printNumberFields(field: keyof ScrollSingleNumberPlugin): void {
             for (let i = 0; i < this._numbers.length; i++) {
                 console.log(` ===== ${i} ${this._numbers[i][field]} ===== `);
+            }
+        }
+
+
+        public setLabelStyle(style: LabelStyle): void {
+            this._labelStyle = style;
+            for (let i = 0; i < this._numbers.length; i++) {
+                this._numbers[i].setLabelStyle(style);
             }
         }
 
@@ -573,6 +583,18 @@ module mvc {
             this._onComplete();
             this._currentValue = this._endValue;
             this._analyze();
+        }
+
+
+        public setLabelStyle(style: LabelStyle): void {
+            let keys = Object.keys(style);
+            for (let i = 0; i < keys.length; i++) {
+                let key = keys[i];
+                if (style[key] != null) {
+                    this._top[key] = style[key];
+                    this._bottom[key] = style[key];
+                }
+            }
         }
 
 
