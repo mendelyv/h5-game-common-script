@@ -253,9 +253,12 @@ module mvc {
 
 
         public set value(v: number) {
-            // this._startValue = v;
             this._endValue = v;
             this._prepare();
+            for (let i = this._numbers.length - 1; i >= 0; i--) {
+                if (this._numbers[i].completeRecycle)
+                    this._recycleNumber(this._numbers[i], i);
+            }
             let value = mgr.toolsMgr.overLength(this._endValue);
             for (let i = 0; i < value.length; i++) {
                 let _value = value[i];
@@ -266,6 +269,7 @@ module mvc {
                 else _number.value = _value;
             }
             this._layout();
+            this._startValue = this._endValue;
         }
 
 
