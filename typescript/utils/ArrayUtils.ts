@@ -106,5 +106,32 @@ export default class ArrayUtils {
     }
 
 
+    /**
+     * 打乱数组，返回一个打乱后的新数组
+     * @param arr - 
+     * @returns 
+     */
+    public static shuffleArray(arr: unknown[]): unknown[] {
+        let res = [...arr];
+        for (let i = res.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [res[i], res[j]] = [res[j], res[i]];
+        }
+        return res;
+    }
+
+
+    /**
+     * 从数组中随机取元素，返回一个新数组
+     * @param arr - 
+     * @param count - 
+     * @returns 
+     */
+    public static getRandomArray(arr: unknown[], count: number): unknown[] {
+        const result = this.shuffleArray(arr);
+        return result.slice(0, count);
+    }
+
+
     // class end
 }
