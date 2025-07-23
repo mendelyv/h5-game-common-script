@@ -132,6 +132,39 @@ export default class ArrayUtils {
         return result.slice(0, count);
     }
 
+    
+    /**
+     * 数组去重
+     * @param source - 源数组
+     * @param getUnique - 获取唯一值的方法，缺省使用源数据
+     * @param strict - 是否还用绝对等于，缺省true
+     * @returns 去重后的新数组
+     */
+    public static unique<T = string | number>(
+        source: T[],
+        getUnique?: (item: T) => string | number,
+        strict: boolean = true,
+    ): T[] {
+        let res: T[] = [];
+        let seen: Record<string, T> = {};
+
+        for (let i = 0; i < source.length; i++) {
+            let s = source[i];
+            let key = String(getUnique ? getUnique(s) : s);
+
+            if (key in seen) {
+                let exist = seen[key];
+                let isEqual = getUnique ? true : strict ? exist === s : exist == s;
+                if (isEqual) continue;
+            }
+
+            seen[key] = s;
+            res.push(s);
+        }
+
+        return res;
+    }
+
 
     // class end
 }
