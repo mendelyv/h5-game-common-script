@@ -42,37 +42,27 @@ export default class Bezier2DPlugin extends BezierBasePlugin {
     }
 
     protected override _onUpdate(dt: number): void {
-        if (this._currentIndex >= this._vectors.length) {
+        let obj = this.dto.obj;
+        this._elapsedTime += dt;
+        let distance = 0;
+        this._elapsedDistance += this.dto.speed * dt;
+        distance = Math.min(this._elapsedDistance, this._totalDisplacement);
+
+        if (distance >= this._totalDisplacement) {
             this._onComplete();
             return;
         }
 
-        let targetPoint = this._vectors[this._currentIndex];
+        let t = this._getTFromDistance(distance);
+        let pos = this._evaluateBezier(t);
+        obj.x = pos.x;
+        obj.y = pos.y;
 
-        let obj = this.dto.obj;
-        let dx = targetPoint.x - obj.x;
-        let dy = targetPoint.y - obj.y;
-        let distance = Math.hypot(dx, dy);
-
-        if (distance > this.dto.epsilon) {
-            let targetRotation = this._calculateLookAtRotation(targetPoint);
-            obj.rotation = this._lerpAngleDegrees(
-                obj.rotation,
-                targetRotation,
-                this.dto.rotateFactor,
-            );
-        }
-
-        let move = Math.min(distance, this.dto.speed * dt);
-        if (distance > this.dto.epsilon) {
-            obj.x += (dx / distance) * move;
-            obj.y += (dy / distance) * move;
-        }
-
-        if (this._checkCurrentStep(distance)) {
-            this._currentIndex++;
-        }
+        let futureT = Math.min(1, t + 0.01);
+        let futurePos = this._evaluateBezier(futureT);
+        let targetRot = this._calculateLookAtRotation(futurePos);
+        obj.rotation = this._lerpAngleDegrees(obj.rotation, targetRot, this.dto.rotateFactor);
     }
 
     // class Bezier2DPlugin end
-}
+}

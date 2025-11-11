@@ -29,40 +29,30 @@ export default class Bezier3DPlugin extends BezierBasePlugin {
     }
 
     public override _onUpdate(dt: number): void {
-        if (this._currentIndex >= this._vectors.length) {
+        let obj = this.dto.obj;
+        let transform = obj.transform;
+        this._elapsedTime += dt;
+        let distance = 0;
+        this._elapsedDistance += this.dto.speed * dt;
+        distance = Math.min(this._elapsedDistance, this._totalDisplacement);
+
+        if (distance >= this._totalDisplacement) {
             this._onComplete();
             return;
         }
 
-        let obj = this.dto.obj;
-        const pos = obj.transform.position;
-        const targetPoint = this._vectors[this._currentIndex];
+        let t = this._getTFromDistance(distance);
+        let pos = this._evaluateBezier(t);
+        transform.localPosition = pos;
 
-        const dx = targetPoint.x - pos.x;
-        const dy = targetPoint.y - pos.y;
-        const dz = targetPoint.z - pos.z;
-        const distance = Math.hypot(dx, dy, dz);
-
-        if (distance > this.dto.epsilon) {
-            const move = Math.min(distance, this.dto.speed * dt);
-            obj.transform.localPositionX += (dx / distance) * move;
-            obj.transform.localPositionY += (dy / distance) * move;
-            obj.transform.localPositionZ += (dz / distance) * move;
-
-            if (this._currentIndex + 1 < this._vectors.length) {
-                const nextTarget = this._vectors[this._currentIndex + 1];
-                const newRot = this._calculateLookAtQuaternion(pos, nextTarget);
-                const currentRot = obj.transform.rotation;
-                const smoothRot = new Laya.Quaternion();
-                const lerpFactor = Math.min(1.0, dt * this.dto.rotateFactor);
-                Laya.Quaternion.slerp(currentRot, newRot, lerpFactor, smoothRot);
-                obj.transform.rotation = smoothRot;
-            }
-        }
-
-        if (this._checkCurrentStep(distance)) {
-            this._currentIndex++;
-        }
+        let futureT = Math.min(1, t + 0.01);
+        let futurePos = this._evaluateBezier(futureT);
+        let newRot = this._calculateLookAtQuaternion(pos, futurePos);
+        let currentRot = transform.rotation;
+        let smooth = new Laya.Quaternion();
+        let lerpFactor = Math.min(1.0, dt * this.dto.rotateFactor);
+        Laya.Quaternion.slerp(currentRot, newRot, lerpFactor, smooth);
+        transform.rotation = smooth;
     }
 
     private _calculateLookAtQuaternion(from: Laya.Vector3, to: Laya.Vector3): Laya.Quaternion {

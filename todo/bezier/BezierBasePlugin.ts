@@ -21,7 +21,14 @@ export default abstract class BezierBasePlugin {
     public get vectors() {
         return this._vectors;
     }
-    protected _currentIndex: number;
+    /** 弧度采样长度 */
+    protected _arcLengths: number[] = [];
+    /** 总路程 */
+    protected _totalDisplacement: number;
+    /** 已经用过的时间 */
+    protected _elapsedTime: number;
+    /** 已经走过的距离 */
+    protected _elapsedDistance: number;
 
     public constructor(dto: BezierBasePluginDto) {
         this.init(dto);
@@ -42,7 +49,7 @@ export default abstract class BezierBasePlugin {
 
     /**
      * 设置完成回调
-     * @param handler - 
+     * @param handler -
      * @param triggerPrevious - 如果 原handler 非空，是否触发
      */
     public setCompleteHandler(handler: Laya.Handler, triggerPrevious: boolean = false) {
@@ -54,20 +61,22 @@ export default abstract class BezierBasePlugin {
         this._completeHandler = handler;
     }
 
-    public frameUpdate(dt?: number) {
-        // if (null == dt) dt = Laya.timer.delta;
-        if (null == dt) dt = 16;
+    public update(dt?: number) {
+        if (null == dt) dt = Laya.timer.delta;
         this._onUpdate(dt);
     }
 
-    public resetCurrentIndex() {
-        this._currentIndex = 0;
+    /** 重置缓动辅助参数 */
+    public resetTweenAuxiliaries() {
+        this._elapsedTime = 0;
+        this._elapsedDistance = 0;
     }
 
     public reset() {
         if (null == this.dto) return;
         this._vectors = this._generateVectors();
-        this.resetCurrentIndex();
+        this._arcLengths = this._generateArcLengths();
+        this.resetTweenAuxiliaries();
     }
 
     /** 帧事件 */
@@ -78,7 +87,7 @@ export default abstract class BezierBasePlugin {
         }
     }
 
-    private _calculateBezierPoint(points: Laya.Vector3[], t: number): Laya.Vector3 {
+    private _calculateBezierVector(points: Laya.Vector3[], t: number): Laya.Vector3 {
         let pts: Laya.Vector3[] = points.map((p) => p.clone());
         let n = pts.length;
         for (let r = 1; r < n; r++) {
@@ -97,18 +106,73 @@ export default abstract class BezierBasePlugin {
      * @param count - 生成点的数量
      * @returns 生成的曲线点
      */
-    public _createBezierPoints(anchors: Laya.Vector3[], count: number): Laya.Vector3[] {
+    public createBezierVectors(anchors: Laya.Vector3[], count: number): Laya.Vector3[] {
         const points = [];
         for (let i = 0; i <= count; i++) {
             const t = i / count;
-            points.push(this._calculateBezierPoint(anchors, t));
+            points.push(this._calculateBezierVector(anchors, t));
         }
         return points;
     }
 
     /** 生成贝塞尔点 */
     protected _generateVectors(): Laya.Vector3[] {
-        return this._createBezierPoints(this.dto.auxiliaryVectors, this.dto.count);
+        return this.createBezierVectors(this.dto.auxiliaryVectors, this.dto.count);
+    }
+
+    /**
+     * 生成贝塞尔曲线的弧长参数
+     * @returns
+     */
+    protected _generateArcLengths() {
+        let res = [];
+        let total = 0;
+        res.push(total);
+        for (let i = 1; i < this._vectors.length; i++) {
+            let v1 = this._vectors[i - 1];
+            let v2 = this._vectors[i];
+            total += Math.hypot(v2.x - v1.x, v2.y - v1.y, v2.z - v1.z);
+            res.push(total);
+        }
+        this._totalDisplacement = total;
+        return res;
+    }
+
+    /**
+     * 根据距离反求弧长参数 t 值，t 值范围 [0, 1]
+     * @param distance -
+     * @returns
+     */
+    protected _getTFromDistance(distance: number): number {
+        if (distance <= 0) return 0;
+        if (distance >= this._totalDisplacement) return 1;
+        for (let i = 1; i < this._arcLengths.length; i++) {
+            if (this._arcLengths[i] >= distance) {
+                let previous = this._arcLengths[i - 1];
+                let ratio = (distance - previous) / (this._arcLengths[i] - previous);
+                return (i - 1 + ratio) / (this._vectors.length - 1);
+            }
+        }
+        return 1;
+    }
+
+    /**
+     * 根据弧长参数估算位置
+     * @param t -
+     * @returns
+     */
+    protected _evaluateBezier(t: number): Laya.Vector3 {
+        let count = this._vectors.length - 1;
+        let idx = Math.floor(t * count);
+        let next = Math.min(idx + 1, count);
+        let localT = t * count - idx;
+        let v1 = this._vectors[idx];
+        let v2 = this._vectors[next];
+        return new Laya.Vector3(
+            v1.x + (v2.x - v1.x) * localT,
+            v1.y + (v2.y - v1.y) * localT,
+            v1.z + (v2.z - v1.z) * localT,
+        );
     }
 
     /** 检查索引是否需要步进 */
@@ -129,4 +193,4 @@ export default abstract class BezierBasePlugin {
     }
 
     // class BezierBasePlugin end
-}
+}
