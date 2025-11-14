@@ -1,6 +1,5 @@
 export interface IQuadTreeObject {
     rect: QuadTreeRect;
-    hightlight(): void;
 }
 
 export class QuadTreeRect {
@@ -19,9 +18,9 @@ export class QuadTreeRect {
     public contains(rect: QuadTreeRect): boolean {
         return (
             rect.x >= this.x &&
-            rect.x + rect.width <= this.x + this.width &&
-            rect.y >= this.y &&
-            rect.y + rect.height <= this.y + this.height
+                rect.x + rect.width <= this.x + this.width &&
+                rect.y >= this.y &&
+                rect.y + rect.height <= this.y + this.height
         );
     }
 
@@ -53,7 +52,7 @@ export default class QuadTree<T extends IQuadTreeObject> {
     }
 
     public insert(obj: T): boolean {
-        if (this.objects.length < this.MAX_COUNT && !this.divided) {
+        if (!this.divided && this.objects.length < this.MAX_COUNT) {
             if (this.rect.coincidence(obj.rect) > 0) {
                 this.objects.push(obj);
                 return true;
@@ -111,6 +110,7 @@ export default class QuadTree<T extends IQuadTreeObject> {
     }
 
     public divide(): void {
+        if (this.rect.width <= 1 || this.rect.height <= 1) return;
         let x = this.rect.x;
         let y = this.rect.y;
         let w = this.rect.width;
@@ -160,20 +160,9 @@ export default class QuadTree<T extends IQuadTreeObject> {
             child.clear();
         }
         this.children = [];
-        for (let i = 0; i < this.objects.length; i++) {
-            let object = this.objects[i];
-            object = null;
-        }
         this.objects = [];
         this.depth = 0;
         this.divided = false;
-    }
-
-    public highlight() {
-        for (let i = 0; i < this.objects.length; i++) {
-            let obj = this.objects[i];
-            obj.hightlight();
-        }
     }
 
     public destructor(): void {
@@ -181,4 +170,4 @@ export default class QuadTree<T extends IQuadTreeObject> {
         this.children = null;
         this.objects = null;
     }
-}
+}
