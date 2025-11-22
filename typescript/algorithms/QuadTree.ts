@@ -18,9 +18,9 @@ export class QuadTreeRect {
     public contains(rect: QuadTreeRect): boolean {
         return (
             rect.x >= this.x &&
-                rect.x + rect.width <= this.x + this.width &&
-                rect.y >= this.y &&
-                rect.y + rect.height <= this.y + this.height
+            rect.x + rect.width <= this.x + this.width &&
+            rect.y >= this.y &&
+            rect.y + rect.height <= this.y + this.height
         );
     }
 
@@ -29,10 +29,9 @@ export class QuadTreeRect {
         let y1 = Math.max(this.y, rect.y);
         let x2 = Math.min(this.x + this.width, rect.x + rect.width);
         let y2 = Math.min(this.y + this.height, rect.y + rect.height);
-        let width = x2 - x1;
-        let height = y2 - y1;
-        if (width < 0 || height < 0) return -1;
-        return width * height;
+        let w = x2 - x1;
+        let h = y2 - y1;
+        return w > 0 && h > 0 ? w * h : -1;
     }
 }
 
@@ -52,14 +51,14 @@ export default class QuadTree<T extends IQuadTreeObject> {
     }
 
     public insert(obj: T): boolean {
+        if (this.rect.coincidence(obj.rect) <= 0) return false;
+
         if (!this.divided && this.objects.length < this.MAX_COUNT) {
-            if (this.rect.coincidence(obj.rect) > 0) {
-                this.objects.push(obj);
-                return true;
-            }
+            this.objects.push(obj);
+            return true;
         }
 
-        if (this.depth > this.MAX_DEPTH) {
+        if (this.depth >= this.MAX_DEPTH) {
             console.error(" ***** max depth and max count, check it ***** \n");
             return false;
         }
@@ -69,35 +68,22 @@ export default class QuadTree<T extends IQuadTreeObject> {
             this.divided = true;
         }
 
-        let maxChild = null;
-        let maxArea = 0;
         for (let i = 0; i < this.children.length; i++) {
             let child = this.children[i];
-            let contains = child.rect.contains(obj.rect);
-            if (contains) {
-                return child.insert(obj);
-            } else {
-                let area = child.rect.coincidence(obj.rect);
-                if (area > maxArea) {
-                    maxChild = child;
-                    maxArea = area;
-                }
-            }
-        }
-        if (null != maxChild) {
-            return maxChild.insert(obj);
+            if (child.rect.contains(obj.rect)) return child.insert(obj);
         }
 
-        return false;
+        this.objects.push(obj);
+        return true;
     }
 
     public query(range: QuadTreeRect, res: T[]) {
-        if (!this.rect.contains(range)) return;
+        if (this.rect.coincidence(range) <= 0) return;
 
-        if (this.objects.length > 0) {
-            for (let i = 0; i < this.objects.length; i++) {
-                let obj = this.objects[i];
-                res.push(obj);
+        for (let i = 0; i < this.objects.length; i++) {
+            let object = this.objects[i];
+            if (object.rect.coincidence(range) > 0) {
+                res.push(object);
             }
         }
 
@@ -115,43 +101,35 @@ export default class QuadTree<T extends IQuadTreeObject> {
         let y = this.rect.y;
         let w = this.rect.width;
         let h = this.rect.height;
-        if (null == this.children) this.children = [];
-        // 右上角
-        this.children.push(new QuadTree<T>(new QuadTreeRect(x + w / 2, y, w / 2, h / 2)));
-        // 左上角
-        this.children.push(new QuadTree<T>(new QuadTreeRect(x, y, w / 2, h / 2)));
-        // 左下角
-        this.children.push(new QuadTree<T>(new QuadTreeRect(x, y + h / 2, w / 2, h / 2)));
-        // 右下角
-        this.children.push(new QuadTree<T>(new QuadTreeRect(x + w / 2, y + h / 2, w / 2, h / 2)));
+
+        let halfW = w / 2;
+        let halfH = h / 2;
+
+        this.children = [
+            new QuadTree<T>(new QuadTreeRect(x, y, halfW, halfH)), // 左上
+            new QuadTree<T>(new QuadTreeRect(x + halfW, y, halfW, halfH)), // 右上
+            new QuadTree<T>(new QuadTreeRect(x, y + halfH, halfW, halfH)), // 左下
+            new QuadTree<T>(new QuadTreeRect(x + halfW, y + halfH, halfW, halfH)), // 右下
+        ];
 
         for (let i = 0; i < this.children.length; i++) this.children[i].depth = this.depth + 1;
 
-        for (let i = 0; i < this.objects.length; i++) {
-            let obj = this.objects[i];
-            let maxChild = null;
-            let maxArea = 0;
+        // 重新分配旧对象
+        let oldObjects = this.objects;
+        this.objects = [];
+        for (let i = 0; i < oldObjects.length; i++) {
+            let oldObject = oldObjects[i];
+            let inserted = false;
             for (let j = 0; j < this.children.length; j++) {
                 let child = this.children[j];
-                let contains = child.rect.contains(obj.rect);
-                if (contains) {
-                    child.insert(obj);
-                    maxChild = null;
+                if (child.rect.contains(oldObject.rect)) {
+                    child.insert(oldObject);
+                    inserted = true;
                     break;
-                } else {
-                    let area = child.rect.coincidence(obj.rect);
-                    if (area > maxArea) {
-                        maxChild = child;
-                        maxArea = area;
-                    }
                 }
             }
-            if (null != maxChild) {
-                maxChild.insert(obj);
-            }
+            if (!inserted) this.objects.push(oldObject);
         }
-
-        this.objects = [];
     }
 
     public clear() {
