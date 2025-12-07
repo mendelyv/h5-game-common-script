@@ -27,6 +27,10 @@ export class UnitBaseContainerProgressBar<T extends Laya.View & IUnitBaseContain
     protected _value: number = 0;
     protected _max: number = 1;
 
+    protected _valueIncreaseDirection: number = 0;
+    protected _valueIncreaseSpeed: number = 0;
+    protected _targetValue: number = 0;
+
 
     public get max(): number {
         return this._max;
@@ -50,14 +54,56 @@ export class UnitBaseContainerProgressBar<T extends Laya.View & IUnitBaseContain
     }
 
 
+    public updateValue(value: number, time: number) {
+        if (null != time) {
+            this._targetValue = value;
+            let offset = value - this.value;
+            this._valueIncreaseDirection = offset > 0 ? 1 : -1;
+            this._valueIncreaseSpeed = offset / time; this._turnUpdate(true);
+        } else {
+            this.value = value;
+        }
+    }
+
+
+    public update() {
+        let dt = Laya.timer.delta;
+        this.value = this.value + this._valueIncreaseSpeed * dt;
+        this._updateLimit();
+    }
+
+
+    protected _updateLimit() { 
+        if (this._valueIncreaseDirection > 0) {
+            if (this.value >= this._targetValue) {
+                this.value = this._targetValue;
+                this._turnUpdate(false);
+            }
+        } else {
+            if (this.value <= this._targetValue) {
+                this.value = this._targetValue; this._turnUpdate(false); 
+            }
+        }
+    }
+
+
+    protected _turnUpdate(on: boolean) {
+        if (on) Laya.timer.frameLoop(1, this, this.update);
+        else Laya.timer.clear(this, this.update);
+    }
+
+
     public setProgressImage(value: string): void {
         this.container.imgProgress.skin = value;
     }
+
+
     public setLabel(value: string): void {
         if (this._container.lblProgress == null)
             return;
         this._container.lblProgress.text = value;
     }
+
 
     /**
      * 设置进度条填充图片布局
@@ -95,11 +141,10 @@ export class UnitBaseContainerProgressBar<T extends Laya.View & IUnitBaseContain
 
     protected _updateProgressByMask(): void {
         if (this._progressMask != null) {
-            this.container.imgProgress.mask = null;
-            this._progressMask.graphics.clear();
-            this._progressMask.destroy();
+            this._progressMask = new Laya.Sprite();
+            this.container.imgProgress.mask = this._progressMask;
         }
-        this._progressMask = new Laya.Sprite();
+        this._progressMask.graphics.clear();
 
         switch (this.direction) {
             case UnitProgressBarDirection.up: {
@@ -113,7 +158,6 @@ export class UnitBaseContainerProgressBar<T extends Laya.View & IUnitBaseContain
             } break;
         }
 
-        this.container.imgProgress.mask = this._progressMask;
     }
 
 
