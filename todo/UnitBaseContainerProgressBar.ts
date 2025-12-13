@@ -32,6 +32,12 @@ export class UnitBaseContainerProgressBar<T extends Laya.View & IUnitBaseContain
     protected _targetValue: number = 0;
 
 
+    public constructor() {
+        super();
+        this._progressMask = new Laya.Sprite();
+    }
+
+
     public get max(): number {
         return this._max;
     }
@@ -140,12 +146,8 @@ export class UnitBaseContainerProgressBar<T extends Laya.View & IUnitBaseContain
 
 
     protected _updateProgressByMask(): void {
-        if (this._progressMask != null) {
-            this._progressMask = new Laya.Sprite();
-            this.container.imgProgress.mask = this._progressMask;
-        }
+        this.container.imgProgress.mask = null;
         this._progressMask.graphics.clear();
-
         switch (this.direction) {
             case UnitProgressBarDirection.up: {
                 this._progressMaskDirectionSize = this.container.height * this.value / this._max;
@@ -157,7 +159,7 @@ export class UnitBaseContainerProgressBar<T extends Laya.View & IUnitBaseContain
                 this._progressMask.graphics.drawRect(0, 0, this._progressMaskDirectionSize, this.container.height, "#000000");
             } break;
         }
-
+        this.container.imgProgress.mask = this._progressMask;
     }
 
 
